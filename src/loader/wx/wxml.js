@@ -1,8 +1,8 @@
 /*
  * @Author: bucai
  * @Date: 2021-02-04 10:40:19
- * @LastEditors: bucai
- * @LastEditTime: 2021-02-04 14:57:29
+ * @LastEditors: bucai<1450941858@qq.com>
+ * @LastEditTime: 2021-11-03 15:18:40
  * @Description:
  */
 
@@ -10,7 +10,7 @@
 const htmlparser2 = require("htmlparser2");
 const domSerializer = require('dom-serializer').default;
 const FAKE_ROOT = Symbol.for('fake-root');
-const defaultConfig = require('../config/default');
+const defaultConfig = require('../../config/default');
 
 
 /**

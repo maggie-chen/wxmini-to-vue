@@ -2,13 +2,13 @@
 /*
  * @Author: bucai
  * @Date: 2021-02-04 10:40:28
- * @LastEditors: bucai
- * @LastEditTime: 2021-02-04 18:24:14
+ * @LastEditors: bucai<1450941858@qq.com>
+ * @LastEditTime: 2021-11-03 15:18:32
  * @Description:
  */
 
 const cssTree = require('css-tree')
-const defaultConfig = require('../config/default');
+const defaultConfig = require('../../config/default');
 
 module.exports = (code, options = defaultConfig) => {
   options.elementMap = options.elementMap || defaultConfig.elementMap;
