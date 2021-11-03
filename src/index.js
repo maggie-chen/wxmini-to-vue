@@ -1,8 +1,8 @@
 /*
  * @Author: bucai
  * @Date: 2021-02-04 10:34:52
- * @LastEditors: bucai
- * @LastEditTime: 2021-02-04 16:19:30
+ * @LastEditors: bucai<1450941858@qq.com>
+ * @LastEditTime: 2021-11-03 14:41:54
  * @Description:
  */
 const fs = require('fs')
@@ -17,7 +17,7 @@ module.exports = class {
    * @param {defaultConfig} options 配置
    */
   constructor(options = defaultConfig) {
-    this.options = options;
+    this.options = Object.assign({}, defaultConfig, options);
   }
 
   /**

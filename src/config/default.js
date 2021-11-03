@@ -1,8 +1,8 @@
 /*
  * @Author: bucai
  * @Date: 2021-02-04 11:03:05
- * @LastEditors: bucai
- * @LastEditTime: 2021-02-04 13:53:56
+ * @LastEditors: bucai<1450941858@qq.com>
+ * @LastEditTime: 2021-11-03 14:55:26
  * @Description: 默认配置文件
  */
 
@@ -28,13 +28,5 @@ module.exports = {
     navigateTo: '$router.push',
     showModal: '$dialog',
     request: '$http'
-  },
-  /**
-   *
-   * @param {string} name argsKeyName
-   * @param {Node} node Node
-   */
-  wxApiArgsFun: (node) => {
-
   }
 }
