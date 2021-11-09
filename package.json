@@ -22,6 +22,7 @@
   "scripts": {
     "commit": "git-cz",
     "test": "jest --coverage",
+    "test:watch": "jest --watch",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0"
   },
   "license": "Apache-2.0",
@@ -45,6 +46,7 @@
     "css-tree": "^1.1.2",
     "dom-serializer": "^1.2.0",
     "htmlparser2": "^6.0.0",
-    "js-beautify": "^1.13.5"
+    "js-beautify": "^1.13.5",
+    "lodash": "^4.17.21"
   }
 }

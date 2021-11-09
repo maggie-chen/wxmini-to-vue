@@ -11,7 +11,7 @@ module.exports = {
   cssUnitScale: 2,
   cssUnit: 'px',
   // 排除的文件夹
-  exclude: ['node_modules', 'npm', '.git', '.vscode', 'dist'],
+  exclude: ['node_modules', 'npm', '\\.git', '\\.vscode', 'dist'],
   // 元素映射
   elementMap: {
     text: 'span',

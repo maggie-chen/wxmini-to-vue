@@ -231,7 +231,5 @@ module.exports = (code, options = defaultConfig) => {
     }
   });
 
-  const result = generator(ast, {}, code)
-
-  return result.code;
+  return ast;
 }

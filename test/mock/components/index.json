@@ -1,0 +1,5 @@
+{
+    "usingComponents": {
+        "mix-view": "../../components/mix-view/index"
+    }
+}
