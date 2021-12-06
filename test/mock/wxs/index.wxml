@@ -1,3 +1,4 @@
+<wxs module="fn" src="../../wxs/fn.wxs"></wxs>
 <wxs module="wxsData">
     var foo = "'hello world' from tools.wxs";
     var bar = function (d) {

@@ -1,3 +1,5 @@
 Page({
-    data:{}
+    data:{
+        a:1
+    }
 })

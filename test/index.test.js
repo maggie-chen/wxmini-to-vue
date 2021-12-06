@@ -17,6 +17,14 @@ describe('主程序测试', () => {
   const mockPath = path.resolve(__dirname, './mock');
   const outputPath = path.resolve(__dirname, './output');
 
+  test('component-js', async () => {
+    const t = new T()
+    await t.transform(path.join(mockPath, 'component'), path.join(outputPath, 'component'))
+    const componentPath = path.resolve(outputPath, 'component/index.vue')
+    const stat = fs.statSync(componentPath)
+    expect(stat.isFile()).toBe(true)
+  });
+
   test('wxs', async () => {
     const t = new T()
     await t.transform(path.join(mockPath, 'wxs'), path.join(outputPath, 'wxs'))
@@ -25,7 +33,7 @@ describe('主程序测试', () => {
     expect(stat.isFile()).toBe(true)
   });
 
-  test('components', async () => {
+  test('usingComponents', async () => {
     const t = new T()
     await t.transform(path.join(mockPath, 'components'), path.join(outputPath, 'components'))
     const componentPath = path.resolve(outputPath, 'components/index.vue')

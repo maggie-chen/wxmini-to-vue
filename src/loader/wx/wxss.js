@@ -40,8 +40,8 @@ module.exports = (code, options = defaultConfig) => {
     if (node.type !== 'Dimension') return;
     // TODO: 后面要改成按配置 （单位比例）
     if (/(r|u)px/.test(node.unit)) {
-      node.value = node.value / 2;
-      node.unit = 'px';
+      node.value = node.value / options.cssUnitScale;
+      node.unit = options.cssUnit;
     }
   }
 

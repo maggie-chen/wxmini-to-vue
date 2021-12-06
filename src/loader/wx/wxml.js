@@ -1,8 +1,8 @@
 /*
  * @Author: bucai
  * @Date: 2021-02-04 10:40:19
- * @LastEditors: bucai<1450941858@qq.com>
- * @LastEditTime: 2021-11-03 15:18:40
+ * @LastEditors: maggiec
+ * @LastEditTime: 2021-11-09 14:51:05
  * @Description:
  */
 
@@ -15,10 +15,10 @@ const defaultConfig = require('../../config/default');
 
 /**
  *
- * @param {*} code
+ * @param {*} nodeTree
  * @param {*} options
  */
-module.exports = (code, options = defaultConfig) => {
+module.exports = (nodeTree, options = defaultConfig) => {
   options.elementMap = options.elementMap || defaultConfig.elementMap;
 
   /**
@@ -53,6 +53,23 @@ module.exports = (code, options = defaultConfig) => {
     const tag = node.name
     node.name = options.elementMap[tag] || tag
     return node;
+  }
+
+  /**
+   * 行内单位处理
+   * @param value
+   */
+  const transformValueUnit = (value) => {
+    const matchResult = value.match(/\d+(\.\d+)?rpx/g);
+    if (matchResult) {
+      matchResult.map((v) => {
+        const numberResult = v.match(/\d+(\.\d+)?/);
+        if(numberResult){
+          value = value.replace(v, numberResult[0] / options.cssUnitScale + options.cssUnit);
+        }
+      }); 
+    }
+    return value;
   }
   /**
    * 属性转换
@@ -100,7 +117,7 @@ module.exports = (code, options = defaultConfig) => {
         newValue = `'${newValue}'`
       }
 
-      newAttribs[newKey] = newValue
+      newAttribs[newKey] = transformValueUnit(newValue)
     }
 
     // 对 for 循环的一个操作
@@ -170,10 +187,11 @@ module.exports = (code, options = defaultConfig) => {
     return tree;
   }
 
+  if (typeof nodeTree === 'string') {
+    nodeTree = parser(nodeTree);
+  }
 
-  const treeNode = parser(code);
-
-  const tree = transformTree(treeNode)
+  const tree = transformTree(nodeTree)
 
   const output = domSerializer(tree.children, {})
 

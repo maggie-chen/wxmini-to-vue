@@ -37,24 +37,29 @@ module.exports = class {
 
     const tasks = list.map(inputPath => {
       // loader 执行的
-      const result = this.loader(inputPath, this.options);
-      return Promise
-        .resolve(result)
-        .then(components => {
-          if (!components) return;
-          if (!Array.isArray(components)) {
-            components = [components]
-          }
-          components.forEach(component => {
-            const { code, name } = component;
-            const baseUrl = path.join(output, inputPath.replace(entry, ''))
-            // 同步创建目录
-            mkdirSync(baseUrl);
-            const outputPath = path.join(baseUrl, name + '.vue');
-            // 写入文件
-            this._toFile(outputPath, code)
+      try {
+        const result = this.loader(inputPath, this.options);
+        return Promise
+          .resolve(result)
+          .then(components => {
+            if (!components) return;
+            if (!Array.isArray(components)) {
+              components = [components]
+            }
+            components.forEach(component => {
+              const { code, name } = component;
+              const baseUrl = path.join(output, inputPath.replace(entry, ''))
+              // 同步创建目录
+              mkdirSync(baseUrl);
+              const outputPath = path.join(baseUrl, name + '.vue');
+              // 写入文件
+              this._toFile(outputPath, code)
+            });
           });
-        });
+      } catch (error) {
+        console.log(inputPath, '编译失败');
+        return Promise.resolve()
+      }
     });
     return Promise.all(tasks)
   }
@@ -76,7 +81,7 @@ module.exports = class {
   _getDirList (entry) {
     return traverseDir(entry)
       .filter(item => {
-        return !(new RegExp(this.options.exclude.join('|')).test(item));
+        return !(new RegExp(this.options.exclude.join('|') + '$').test(item)); // fix：文件过滤正则
       });
   }
 }

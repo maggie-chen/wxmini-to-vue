@@ -2,8 +2,8 @@
 /*
  * @Author: bucai
  * @Date: 2021-02-04 10:40:24
- * @LastEditors: bucai<1450941858@qq.com>
- * @LastEditTime: 2021-11-03 15:18:44
+ * @LastEditors: maggiec
+ * @LastEditTime: 2021-11-09 14:51:05
  * @Description:
  */
 
@@ -13,6 +13,23 @@ const traverse = require('@babel/traverse').default
 const bTypes = require('@babel/types')
 const defaultConfig = require('../../config/default');
 
+// 根property名称映射关系
+const rootPropertyNameMaps = {
+  // 生命周期
+  onLoad: 'created',
+  onShow: 'mounted',
+  onReady: 'mounted',
+  onHide: 'destroyed',
+  onUnload: 'destroyed',
+  attached: 'mounted',
+  detached: 'destroyed',
+  // 属性
+  properties: 'props'
+}
+
+// 根property名称集合
+const rootPropertyNames = ['data', 'lifetimes', ...Object.keys(rootPropertyNameMaps)]
+
 /**
  * 小程序js转换
  * @param {*} code
@@ -20,16 +37,16 @@ const defaultConfig = require('../../config/default');
  */
 module.exports = (code, options = defaultConfig) => {
   options.wxApiMap = options.wxApiMap || options.wxApiMap;
-
-  const ast = parser.parse(code, {})
+  let isComponent = false; // feat：解析Component
+  const ast = parser.parse(code, { sourceType: 'module' })
   traverse(ast, {
     Identifier (path) {
       const node = path.node;
       const nType = node.type;
       // BUG: 改变声明周期，这里会存在如果不是顶级（export default { **** }）的元素会导致更改错误的名称出现异常
-      if (nType === "Identifier" && node.name === "onLoad") {
-        // 替换
-        node.name = "created";
+      // feat：root property 名称替换
+      if (nType === "Identifier" && Object.keys(rootPropertyNameMaps).includes(node.name)) {
+        node.name = rootPropertyNameMaps[node.name];
         path.replaceWith(node);
       }
     },
@@ -50,12 +67,22 @@ module.exports = (code, options = defaultConfig) => {
         );
         path.replaceWith(node_new);
       }
+      // feat：解析Component：去掉lifetimes
+      if(node.rootProperty && node.key.name == "lifetimes" && node.value.type == "ObjectExpression"){
+        if(bTypes.isObjectExpression(path.parent)){
+          path.parent.properties.push(...node.value.properties)
+          path.remove();
+        }
+      }
     },
     ExpressionStatement (path) {
       const node = path.node;
       const nExpression = node.expression;
       // BUG: 代码 已经存在 export default 的问题
       if (nExpression.type === "CallExpression" && ["Component", "Page"].includes(nExpression.callee.name)) {
+        if(nExpression.callee.name === 'Component'){
+          isComponent = true;
+        }
         // 拿到传入的对象
         const data = nExpression.arguments[0];
         const node_new = bTypes.exportDefaultDeclaration(data);
@@ -69,28 +96,39 @@ module.exports = (code, options = defaultConfig) => {
       if (path.node.isAction) return;
       const declaration = path.node.declaration;
       const properties = declaration.properties;
+      // fix：提前声明data
+      const findData = properties.find(n=>n.key.name === 'data');
+      if (!findData) {
+        properties.push(bTypes.objectProperty(bTypes.identifier('data'),bTypes.objectExpression([])))
+      }
       // 一级数据
       const rootProperty = properties
         .filter((n) => {
-          return ["data", "onLoad"].includes(n.key.name);
+          return rootPropertyNames.includes(n.key.name);
         })
         .map((node) => {
+          // fix：默认都存在data，并含有this.$attrs （小程序可能存在模板引用时直接传入数据，转为vue时需要对this.$attrs展开为data）
+          if(node.key.name === 'data' && node.value.type == "ObjectExpression"){
+            node.value.properties.push(bTypes.spreadElement(bTypes.memberExpression(bTypes.thisExpression(), bTypes.identifier('$attrs'), false)))
+          }
           // 标记一下
           node.rootProperty = true;
           return node;
         });
       const otherProperty = properties.filter((n) => {
-        return !["data", "onLoad"].includes(n.key.name);
+        return !rootPropertyNames.includes(n.key.name);
       });
-      // 提出来
-      const node_new = bTypes.exportDefaultDeclaration(
-        bTypes.objectExpression([
-          ...rootProperty,
-          bTypes.objectProperty(bTypes.identifier("methods"), bTypes.objectExpression(otherProperty))
-        ])
-      );
-      node_new.isAction = true;
-      path.replaceWith(node_new);
+      if (!isComponent) {
+        // 提出来
+        const node_new = bTypes.exportDefaultDeclaration(
+          bTypes.objectExpression([
+            ...rootProperty,
+            bTypes.objectProperty(bTypes.identifier("methods"), bTypes.objectExpression(otherProperty))
+          ])
+        );
+        node_new.isAction = true;
+        path.replaceWith(node_new);
+      }
     },
     CallExpression (path) {
       const node = path.node;

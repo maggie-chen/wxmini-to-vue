@@ -1,8 +1,8 @@
 /*
  * @Author: bucai<1450941858@qq.com>
  * @Date: 2021-11-03 17:21:48
- * @LastEditors: bucai<1450941858@qq.com>
- * @LastEditTime: 2021-11-03 17:21:48
+ * @LastEditors: maggiec
+ * @LastEditTime: 2021-11-09 14:51:05
  * @Description: 
  */
 const fs = require('fs');
@@ -31,10 +31,15 @@ function readWxComponents (dir) {
     // 检测 json
     const [wxml, wxss, wxjs, wxjson] = ['wxml', 'wxss', 'js', 'json'].map((type) => {
       const filePath = path.join(dir, name + '.' + type);
-      const stat = fs.statSync(filePath)
-      if (!stat.isFile()) return null;
-      const code = fs.readFileSync(filePath).toString('utf-8')
-      return code
+      // fix：允许文件结构不全，默认返回空字符
+      try {
+        const stat = fs.statSync(filePath)
+        if (!stat.isFile()) return null;
+        const code = fs.readFileSync(filePath).toString('utf-8')
+        return code
+      } catch (error) {
+        return ''
+      }
     });
     return {
       wxml,
@@ -57,6 +62,11 @@ function combination(template, js, css) {
   return code;
 }
 
+/**
+ * 解析WXML
+ * @param {*} doc 
+ * @returns 
+ */
 const wxmlParser = (doc) => {
   const handler = new htmlparser2.DomHandler();
   const parser = new htmlparser2.Parser(handler, {
@@ -73,8 +83,6 @@ const wxmlParser = (doc) => {
       children: Array.isArray(handler.dom) ? handler.dom : [handler.dom]
   }
 }
-
-
 
 module.exports = {
   readWxComponents,
